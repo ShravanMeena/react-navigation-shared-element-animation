@@ -1,21 +1,53 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createSharedElementStackNavigator } from "react-navigation-shared-element";
+import HomeScreen from "./src/RN-Shared/HomeScreen";
+import DetailScreen from "./src/RN-Shared/DetailScreen";
 
-export default function App() {
+// import { createStackNavigator } from "@react-navigation/stack";
+
+// const Stack = createStackNavigator();
+const Stack = createSharedElementStackNavigator();
+
+function MyStack() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          gestureEnabled: true,
+          cardStyleInterpolator: ({ current: { progress } }) => {
+            return {
+              cardStyle: { opacity: progress },
+            };
+          },
+          cardStyle: {
+            backgroundColor: "transparent",
+          },
+        }}
+        headerMode='none'
+        initialRouteName='Home'>
+        <Stack.Screen name='Home' component={HomeScreen} />
+        <Stack.Screen
+          name='Details'
+          component={DetailScreen}
+          sharedElementsConfig={(route, otherRoute, showing) => {
+            if (route.name === "Details" && showing) {
+              const { item } = route.params;
+              return [
+                {
+                  id: `item.${item.id}.image_url`,
+                  animation: "move",
+                  // resize: "clip",
+                  // align: "left-top",
+                },
+              ];
+            }
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default MyStack;
